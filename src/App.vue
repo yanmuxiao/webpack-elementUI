@@ -1,45 +1,40 @@
 <template>
-  <div id="app">
+  <div id="app" class="el-app">
 
-    <header class="header">
+    <header class="el-header">
 
-        <el-menu theme="dark" :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
-            <el-menu-item index="1">处理中心</el-menu-item>
-            <el-submenu index="2">
-              <template slot="title">我的工作台</template>
-              <el-menu-item index="2-1">选项1</el-menu-item>
-              <el-menu-item index="2-2">选项2</el-menu-item>
-              <el-menu-item index="2-3">选项3</el-menu-item>
-            </el-submenu>
-            <el-menu-item index="3"><a href="https://www.ele.me" target="_blank">订单管理</a></el-menu-item>
-        </el-menu>
+        <div class="el-header-nav">
+
+            <el-menu theme="dark" :default-active="activeIndex" class="el-menu-sync" mode="horizontal">
+                <el-menu-item index="1">
+
+                  <router-link to="/">同步任务</router-link>
+
+                </el-menu-item>
+                <el-menu-item index="2">
+
+                  <router-link  to="/stripeTable">任务日志清单</router-link>
+
+                </el-menu-item>
+            </el-menu>
+
+        </div>
 
     </header>
 
 
-    <aside class="el-aside">
-      <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose" theme="dark">
-            <el-submenu index="1">
-              <template slot="title">导航一</template>
-              <el-menu-item-group title="分组一">
-                <el-menu-item index="1-1">选项1</el-menu-item>
-                <el-menu-item index="1-2">选项2</el-menu-item>
-              </el-menu-item-group>
-              <el-menu-item-group title="分组2">
-                <el-menu-item index="1-3">选项3</el-menu-item>
-              </el-menu-item-group>
-              <el-submenu index="1-4">
-                <template slot="title">选项4</template>
-                <el-menu-item index="1-4-1">选项1</el-menu-item>
-              </el-submenu>
-            </el-submenu>
-            <el-menu-item index="2">导航二</el-menu-item>
-            <el-menu-item index="3">导航三</el-menu-item>
-          </el-menu>
+    <main class="el-main">
+        <div>
 
-    </aside>
+            
+            <router-view class="view"></router-view>
+            
+            
+        </div>
+    </main>
 
     
+
 
 
   </div>
@@ -48,29 +43,19 @@
 <script>
 
 
-export default {
+  export default {
 
-  
-
-
-  data () {
-    return {
-      activeIndex: '1'
-    }
-  },
-
-  methods: {
-      handleSelect(key, keyPath) {
-        console.log(key, keyPath);
-      },
-      handleOpen(key, keyPath) {
-        console.log(key, keyPath);
-      },
-      handleClose(key, keyPath) {
-        console.log(key, keyPath);
+    data () {
+      return {
+        activeIndex: '1'
       }
+    },
+
+    methods: {
+        
+    }
+
   }
-}
 </script>
 
 <style>
@@ -79,13 +64,31 @@ body {
   margin: 0;
 }
 
+.el-app {
+    width: 90%;
+    margin: 0 auto;
+}
 
-.header {
-    
+
+.el-header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 60px;
+    color: #cbcfd4;
+    z-index: 1000;
 }
-.el-aside {
-  width: 160px;
+.el-menu-sync {
+    padding: 0 5%;
 }
+
+
+.el-main {
+    margin-top: 60px;
+    padding: 15px;
+}
+
 
 
 </style>
