@@ -4,7 +4,7 @@ Vue.use(Router)
 
 
 import syncTask from './components/sync-task.vue'
-import stripeTable from './components/stripe-table.vue'
+import editForm from './components/edit-form.vue'
 
 
 export default new Router({
@@ -14,8 +14,8 @@ export default new Router({
       component: syncTask
     },
     {
-      path: '/stripeTable',
-      component: stripeTable
+      path: '/editForm',
+      component: editForm
     }
   ]
 })

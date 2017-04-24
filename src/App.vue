@@ -13,7 +13,7 @@
                 </el-menu-item>
                 <el-menu-item index="2">
 
-                  <router-link  to="/stripeTable">任务日志清单</router-link>
+                  <router-link  to="/editForm">任务日志清单</router-link>
 
                 </el-menu-item>
             </el-menu>
@@ -24,7 +24,7 @@
 
 
     <main class="el-main">
-        <div>
+        <div class="router-view">
 
             
             <router-view class="view"></router-view>
@@ -85,10 +85,11 @@ body {
 
 
 .el-main {
-    margin-top: 60px;
     padding: 15px;
 }
-
+.router-view {
+  padding-top: 60px;
+}
 
 
 </style>
