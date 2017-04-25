@@ -50,6 +50,7 @@
 
 <style>
     
+
     .router-view .line {
         text-align: center;
     }
@@ -62,18 +63,38 @@
 
 
 <script>
+
+  
+  import $ from 'jquery/dist/jquery.min.js'
+  import Mock from 'mockjs/dist/mock-min.js'
+
+
+  let taskListObj = Mock.mock({
+      'taskList|1': [{
+          'name': '@name',
+          'region': '区域二',
+          'date1': '2017-04-12',
+          'date2': new Date(2016, 9, 10, 18, 40),
+          'delivery': true,
+          'type': ['美食/餐厅线上活动', '地推活动'],
+          'resource': '线下场地免费',
+          'desc': '活动形式'
+      }]
+  });
+  Mock.mock('http://editform.cn',taskListObj.taskList);
+
   export default {
     data() {
       return {
         form: {
-          name: '',
-          region: '',
-          date1: '',
-          date2: '',
-          delivery: false,
-          type: [],
-          resource: '',
-          desc: ''
+            name: '',
+            region: '',
+            date1: '',
+            date2: '16:52:01',
+            delivery: true,
+            type: [],
+            resource: '',
+            desc: ''
         }
       }
     },
@@ -82,7 +103,23 @@
           for(let key in this.form) {
               console.log(this.form[key]);
           }
+      },
+      // 导航完成之后获取数据
+      fetchData() {
+          let _this = this;
+          $.ajax({
+              url: 'http://editform.cn',
+              dataType:'json',
+              type: "GET"
+          }).done(function(dataObj, status, xhr){
+
+              _this.form = dataObj
+
+          })
       }
+    },
+    created() {
+        this.fetchData();// 导航完成之后获取数据
     }
   }
 </script>
