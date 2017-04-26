@@ -72,7 +72,7 @@
   let taskListObj = Mock.mock({
       'taskList|1': [{
           'name': '@name',
-          'region': '区域二',
+          'region': 'shanghai',
           'date1': '2017-04-12',
           'date2': new Date(2016, 9, 10, 18, 40),
           'delivery': true,
@@ -82,6 +82,8 @@
       }]
   });
   Mock.mock('http://editform.cn',taskListObj.taskList);
+
+
 
   export default {
     data() {

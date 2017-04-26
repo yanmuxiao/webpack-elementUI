@@ -68,18 +68,31 @@
       </div>
 
 
-      <el-dialog title="收货地址" v-model="dialogFormVisible">
-        <el-form :model="form">
-          <el-form-item label="活动名称" :label-width="formLabelWidth">
-            <el-input v-model="form.name" auto-complete="off"></el-input>
+      <el-dialog title="信息" v-model="dialogFormVisible">
+
+        <el-form label-width="80px">
+          <el-form-item label="姓名">
+            <el-input v-model="form.name"></el-input>
           </el-form-item>
-          <el-form-item label="活动区域" :label-width="formLabelWidth">
-            <el-select v-model="form.region" placeholder="请选择活动区域">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
-            </el-select>
+
+          <el-form-item label="日期">
+            <el-date-picker type="date" placeholder="选择日期" v-model="form.date" :picker-options="pickerOptions" style="width: 100%;"></el-date-picker>
+          </el-form-item>
+
+          <el-form-item label="省份">
+            <el-input v-model="form.province"></el-input>
+          </el-form-item>
+          <el-form-item label="市区">
+            <el-input v-model="form.city"></el-input>
+          </el-form-item>
+          <el-form-item label="地址">
+            <el-input v-model="form.address"></el-input>
+          </el-form-item>
+          <el-form-item label="邮编">
+            <el-input v-model="form.zip"></el-input>
           </el-form-item>
         </el-form>
+
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible = false">取 消</el-button>
           <el-button type="primary" @click="fromConfirm">确 定</el-button>
@@ -87,6 +100,14 @@
       </el-dialog>
 
 
+      <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-size="20"
+      layout="total, prev, pager, next, jumper"
+      :total="taskListCount">
+      </el-pagination>
 
   </div>
 
@@ -99,6 +120,11 @@
       padding-bottom: 15px;
   }
 
+  .el-pagination {
+      padding: 30px 0;
+      text-align: center;
+  }
+
 
 </style>
 
@@ -108,8 +134,32 @@
   import Mock from 'mockjs/dist/mock-min.js'
 
 
+  import Lodash from 'lodash'
+  Date.prototype.format = function(fmt) { 
+       var o = { 
+          "M+" : this.getMonth()+1,                 //月份 
+          "d+" : this.getDate(),                    //日 
+          "h+" : this.getHours(),                   //小时 
+          "m+" : this.getMinutes(),                 //分 
+          "s+" : this.getSeconds(),                 //秒 
+          "q+" : Math.floor((this.getMonth()+3)/3), //季度 
+          "S"  : this.getMilliseconds()             //毫秒 
+      }; 
+      if(/(y+)/.test(fmt)) {
+              fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length)); 
+      }
+      for(var k in o) {
+        if(new RegExp("("+ k +")").test(fmt)){
+             fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+         }
+      }
+      return fmt; 
+  }  
+
+
+  // table的所有数据
   let taskListObj = Mock.mock({
-      'taskList|20': [{
+      'taskList|200': [{
           'date': '@date',
           'name': '@name',
           'province': '@province',
@@ -119,8 +169,17 @@
           'id': '009'
       }]
   });
-  Mock.mock('http://g.cn',taskListObj.taskList);
-  
+
+
+  // 这种写法在可删除的table中有瑕疵而且每一页的条数必须固定
+  let chunkArr = _.chunk(taskListObj.taskList, 20);// 拆页
+  _.forEach(chunkArr, function(value, index) {
+      Mock.mock('http://g.cn?page='+ (parseInt(index) + 1), chunkArr[index]);
+  })
+  Mock.mock('http://taskListCountPageCount.cn', {
+      taskListCount: taskListObj.taskList.length,
+      pageCount: chunkArr.length
+  });
 
 
 
@@ -128,14 +187,28 @@
     methods: {
 
       // 导航完成之后获取数据
-      fetchData() {
+      fetchData(page) {
           let _this = this;
           $.ajax({
-              url: 'http://g.cn',
+              url: 'http://g.cn?page=' + page,
               dataType:'json',
               type: "GET"
           }).done(function(dataObj, status, xhr){
+              _this.tableData3.length = 0;
               _this.tableData3 = _this.tableData3.concat(dataObj)
+          })
+      },
+
+      // 分页
+      paginationFn() {
+          let _this = this;
+          $.ajax({
+              url: 'http://taskListCountPageCount.cn',
+              dataType:'json',
+              type: "GET"
+          }).done(function(dataObj, status, xhr){
+              _this.taskListCount = dataObj.taskListCount;
+              _this.pageCount = dataObj.pageCount;
           })
       },
 
@@ -214,22 +287,50 @@
           type: 'warning'
 
         }).then(() => {
+            /*
+            
+              // 第一种方法 for循环
+              for(let j = 0; j < this.selected.length; j++) {
+                  let index = -1;
+                  for (let i = 0; i < this.tableData3.length; i++) {
+                      if (this.tableData3[i] == this.selected[j]) {
+                          index = i;
+                      }
+                  }
+                  if (index > -1) {
+                    this.tableData3.splice(index, 1);
+                  }
+              }
+              
 
-            for(let j = 0; j < this.selected.length; j++) {
-                let index = -1;
-                for (let i = 0; i < this.tableData3.length; i++) {
-                    if (this.tableData3[i] == this.selected[j]) {
-                        index = i;
-                    }
-                }
+              // 第二种方法 _.findIndex
+              for(let j = 0; j < this.selected.length; j++) {
+
+                  let index = _.findIndex(this.tableData3, this.selected[j])
+
+                  if (index > -1) {
+                    this.tableData3.splice(index, 1);
+                  }
+              }
+              */
+            
+            // 第三种方法 _.findIndex + _.forEach
+            var _this = this;
+            _.forEach(this.selected,function(value) {
+                let index = _.findIndex(_this.tableData3, value);
                 if (index > -1) {
-                  this.tableData3.splice(index, 1);
+                  _this.tableData3.splice(index, 1);
                 }
-            }
+            })
+
+            
+
+
             this.$message({
               type: 'success',
               message: '删除成功!'
             });
+
 
         }).catch(() => {
           this.$message({
@@ -247,29 +348,42 @@
           let _this = this;
           $.ajax({
               type: 'POST',
-              url: 'http://g.cn',
+              url: 'http://g.cn?page=1',
               dataType:'json'
           }).done(function(data, status, xhr){
 
-                console.log(JSON.stringify(data, null, 4))
 
                 _this.dialogFormVisible = false;
                 _this.tableData3.unshift({
-                  date: '2014-04-22',
+                  date: _this.form.date.format("yyyy-MM-dd"),
                   name: _this.form.name,
-                  province: '上海',
-                  city: '普陀区',
-                  address: '上海市普陀区金沙江路 1518 弄',
-                  zip: 200333
+                  province: _this.form.province,
+                  city: _this.form.city,
+                  address: _this.form.address,
+                  zip: _this.form.zip
                 });
                 _this.$message({
                   type: 'success',
                   message: '保存成功'
                 })
+                _this.form.date = '';
                 _this.form.name = '';
+                _this.form.name = '';
+                _this.form.province = '';
+                _this.form.city = '';
+                _this.form.address = '';
+                _this.form.zip = '';
 
           });
          
+      },
+
+      handleSizeChange(val) {
+        this.fetchData(val)
+      },
+      handleCurrentChange(val) {
+        this.currentPage = val;
+        this.fetchData(val);
       }
 
     },
@@ -280,22 +394,33 @@
         dialogFormVisible: false,
         form: {
           name: '',
-          region: '',
-          date1: '',
-          date2: '',
-          delivery: false,
-          type: [],
-          resource: '',
-          desc: ''
+          province: '',
+          date: '',
+          city: '',
+          address: '',
+          zip: '',
+          id: ''
         },
         formLabelWidth: '120px',
         idIndex: 20,
-        tableData3: []
+        tableData3: [],
+
+
+        currentPage: 1,
+        taskListCount: 0,
+        pageCount: 0,
+        pickerOptions: {
+          disabledDate(time) {
+            return time.getTime() < Date.now() - 8.64e7;
+          }
+        }
+
       }
 
     },
     created() {
-        this.fetchData();// 导航完成之后获取数据
+        this.fetchData(1);// 导航完成之后获取数据
+        this.paginationFn();
     }
 }
 </script>
