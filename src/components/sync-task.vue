@@ -126,37 +126,22 @@
   }
 
 
+  .loadingClass {
+      background-color: rgba(0,0,0,0.1);
+  }
+
 </style>
 
 <script>
   
+  import "../static/dateFormat.js" // 日期格式化
+
+
+  import Lodash from 'lodash' 
+
+
   import $ from 'jquery/dist/jquery.min.js'
   import Mock from 'mockjs/dist/mock-min.js'
-
-
-  import Lodash from 'lodash'
-  Date.prototype.format = function(fmt) { 
-       var o = { 
-          "M+" : this.getMonth()+1,                 //月份 
-          "d+" : this.getDate(),                    //日 
-          "h+" : this.getHours(),                   //小时 
-          "m+" : this.getMinutes(),                 //分 
-          "s+" : this.getSeconds(),                 //秒 
-          "q+" : Math.floor((this.getMonth()+3)/3), //季度 
-          "S"  : this.getMilliseconds()             //毫秒 
-      }; 
-      if(/(y+)/.test(fmt)) {
-              fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length)); 
-      }
-      for(var k in o) {
-        if(new RegExp("("+ k +")").test(fmt)){
-             fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
-         }
-      }
-      return fmt; 
-  }  
-
-
   // table的所有数据
   let taskListObj = Mock.mock({
       'taskList|200': [{
@@ -169,6 +154,7 @@
           'id': '009'
       }]
   });
+
 
 
   // 这种写法在可删除的table中有瑕疵而且每一页的条数必须固定
@@ -216,26 +202,32 @@
       deleteRow(index, rows) {
 
         this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
-
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
-
         }).then(() => {
 
-          console.log(rows.splice(index, 1)[0].date);
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
+            let loadingInstance = this.$loading({ 
+              fullscreen: true,
+              customClass: 'loadingClass'
+            });
 
+            let _this = this;
+            setTimeout(function(){
 
+                rows.splice(index, 1);
+                _this.$message({
+                  type: 'success',
+                  message: '删除成功!'
+                });
+                loadingInstance.close();
+
+            },3000)
         }).catch(() => {
-
           this.$message({
             type: 'info',
             message: '已取消删除'
-          });          
+          });  
         });
 
       },
@@ -287,49 +279,30 @@
           type: 'warning'
 
         }).then(() => {
-            /*
-            
-              // 第一种方法 for循环
-              for(let j = 0; j < this.selected.length; j++) {
-                  let index = -1;
-                  for (let i = 0; i < this.tableData3.length; i++) {
-                      if (this.tableData3[i] == this.selected[j]) {
-                          index = i;
-                      }
-                  }
-                  if (index > -1) {
-                    this.tableData3.splice(index, 1);
-                  }
-              }
-              
 
-              // 第二种方法 _.findIndex
-              for(let j = 0; j < this.selected.length; j++) {
-
-                  let index = _.findIndex(this.tableData3, this.selected[j])
-
-                  if (index > -1) {
-                    this.tableData3.splice(index, 1);
-                  }
-              }
-              */
-            
-            // 第三种方法 _.findIndex + _.forEach
-            var _this = this;
-            _.forEach(this.selected,function(value) {
-                let index = _.findIndex(_this.tableData3, value);
-                if (index > -1) {
-                  _this.tableData3.splice(index, 1);
-                }
-            })
-
-            
-
-
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
+            let loadingInstance = this.$loading({ 
+              fullscreen: true,
+              customClass: 'loadingClass'
             });
+
+            let _this = this;
+            setTimeout(function(){
+
+                _.forEach(_this.selected,function(value) {
+                    let index = _.findIndex(_this.tableData3, value);
+                    if (index > -1) {
+                      _this.tableData3.splice(index, 1);
+                    }
+                })
+                _this.$message({
+                  type: 'success',
+                  message: '删除成功!'
+                });
+                loadingInstance.close();
+
+            },3000)
+              
+            
 
 
         }).catch(() => {
@@ -345,36 +318,45 @@
       // 保存表单
       fromConfirm () {
 
-          let _this = this;
-          $.ajax({
-              type: 'POST',
-              url: 'http://g.cn?page=1',
-              dataType:'json'
-          }).done(function(data, status, xhr){
-
-
-                _this.dialogFormVisible = false;
-                _this.tableData3.unshift({
-                  date: _this.form.date.format("yyyy-MM-dd"),
-                  name: _this.form.name,
-                  province: _this.form.province,
-                  city: _this.form.city,
-                  address: _this.form.address,
-                  zip: _this.form.zip
-                });
-                _this.$message({
-                  type: 'success',
-                  message: '保存成功'
-                })
-                _this.form.date = '';
-                _this.form.name = '';
-                _this.form.name = '';
-                _this.form.province = '';
-                _this.form.city = '';
-                _this.form.address = '';
-                _this.form.zip = '';
-
+          let loadingInstance = this.$loading({ 
+            fullscreen: true,
+            customClass: 'loadingClass'
           });
+
+          let _this = this;
+          setTimeout(function() {
+              $.ajax({
+                  type: 'POST',
+                  url: 'http://g.cn?page=1',
+                  dataType:'json'
+              }).done(function(data, status, xhr){
+
+
+                    _this.dialogFormVisible = false;
+                    _this.tableData3.unshift({
+                      date: _this.form.date.format("yyyy-MM-dd"),
+                      name: _this.form.name,
+                      province: _this.form.province,
+                      city: _this.form.city,
+                      address: _this.form.address,
+                      zip: _this.form.zip
+                    });
+                    _this.$message({
+                      type: 'success',
+                      message: '保存成功'
+                    })
+                    _this.form.date = '';
+                    _this.form.name = '';
+                    _this.form.name = '';
+                    _this.form.province = '';
+                    _this.form.city = '';
+                    _this.form.address = '';
+                    _this.form.zip = '';
+
+                    loadingInstance.close();
+
+              });
+          }, 3000)
          
       },
 
@@ -413,8 +395,9 @@
           disabledDate(time) {
             return time.getTime() < Date.now() - 8.64e7;
           }
-        }
+        },
 
+        fullscreenLoading: false
       }
 
     },
