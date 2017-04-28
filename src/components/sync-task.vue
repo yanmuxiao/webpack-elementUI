@@ -154,9 +154,6 @@
           'id': '009'
       }]
   });
-
-
-
   // 这种写法在可删除的table中有瑕疵而且每一页的条数必须固定
   let chunkArr = _.chunk(taskListObj.taskList, 20);// 拆页
   _.forEach(chunkArr, function(value, index) {
@@ -254,7 +251,6 @@
         //for(let i = 0; i < selection.length; i++) {
           //console.log(selection[i].date);
         //}
- 
       },
       // row-click
       rowClickFn(row, event, column) {
@@ -262,7 +258,6 @@
       },
 
       batchDelete() {
-
 
         if(this.selected.length <= 0) {
             this.$message({
@@ -288,12 +283,18 @@
             let _this = this;
             setTimeout(function(){
 
+                // 第一种方法(一般不会删除很多，所以觉得这种更好)
                 _.forEach(_this.selected,function(value) {
                     let index = _.findIndex(_this.tableData3, value);
                     if (index > -1) {
                       _this.tableData3.splice(index, 1);
                     }
                 })
+
+                // 第二种方法
+                //_this.tableData3 = _.difference(_this.tableData3, _this.selected)
+
+
                 _this.$message({
                   type: 'success',
                   message: '删除成功!'
@@ -301,8 +302,6 @@
                 loadingInstance.close();
 
             },3000)
-              
-            
 
 
         }).catch(() => {
