@@ -7,6 +7,7 @@
           <el-button type="info" @click="batchDelete">删除</el-button>
       </div>
 
+
       <div class="el-table-wrap">          
           <el-table
             :data="tableData3"
@@ -210,7 +211,7 @@
             });
 
             let _this = this;
-            setTimeout(function(){
+            _.delay(function(){
 
                 rows.splice(index, 1);
                 _this.$message({
@@ -281,9 +282,9 @@
             });
 
             let _this = this;
-            setTimeout(function(){
 
-                // 第一种方法(一般不会删除很多，所以觉得这种更好)
+            // 第一种方法(一般不会删除很多，所以觉得这种更好)
+            _.delay(function() {
                 _.forEach(_this.selected,function(value) {
                     let index = _.findIndex(_this.tableData3, value);
                     if (index > -1) {
@@ -300,9 +301,7 @@
                   message: '删除成功!'
                 });
                 loadingInstance.close();
-
             },3000)
-
 
         }).catch(() => {
           this.$message({
@@ -323,40 +322,38 @@
           });
 
           let _this = this;
-          setTimeout(function() {
-              $.ajax({
-                  type: 'POST',
-                  url: 'http://g.cn?page=1',
-                  dataType:'json'
-              }).done(function(data, status, xhr){
+          $.ajax({
+              type: 'POST',
+              url: 'http://g.cn?page=1',
+              dataType:'json'
+          }).done(function(data, status, xhr){
 
+              _.delay(function() {
+                _this.dialogFormVisible = false;
+                _this.tableData3.unshift({
+                  date: _this.form.date.format("yyyy-MM-dd"),
+                  name: _this.form.name,
+                  province: _this.form.province,
+                  city: _this.form.city,
+                  address: _this.form.address,
+                  zip: _this.form.zip
+                });
+                _this.$message({
+                  type: 'success',
+                  message: '保存成功'
+                })
+                _this.form.date = '';
+                _this.form.name = '';
+                _this.form.name = '';
+                _this.form.province = '';
+                _this.form.city = '';
+                _this.form.address = '';
+                _this.form.zip = '';
+                loadingInstance.close();
+            }, 3000)
 
-                    _this.dialogFormVisible = false;
-                    _this.tableData3.unshift({
-                      date: _this.form.date.format("yyyy-MM-dd"),
-                      name: _this.form.name,
-                      province: _this.form.province,
-                      city: _this.form.city,
-                      address: _this.form.address,
-                      zip: _this.form.zip
-                    });
-                    _this.$message({
-                      type: 'success',
-                      message: '保存成功'
-                    })
-                    _this.form.date = '';
-                    _this.form.name = '';
-                    _this.form.name = '';
-                    _this.form.province = '';
-                    _this.form.city = '';
-                    _this.form.address = '';
-                    _this.form.zip = '';
-
-                    loadingInstance.close();
-
-              });
-          }, 3000)
-         
+          });
+     
       },
 
       handleSizeChange(val) {
