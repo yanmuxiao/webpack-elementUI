@@ -17,9 +17,7 @@
             @select-all="tableSelectAllFn"
             @select = "tableselectFN"
             @selection-change = "tableSelectChange"
-            @row-click = "rowClickFn"
-
-            >
+            @row-click = "rowClickFn">
 
             <el-table-column
               fixed
@@ -242,7 +240,7 @@
 
       // 单选
       tableselectFN(selection, rows) {
-        
+        console.log(selection);
       },
 
 
@@ -252,10 +250,11 @@
         //for(let i = 0; i < selection.length; i++) {
           //console.log(selection[i].date);
         //}
+        console.log(selection)
       },
       // row-click
       rowClickFn(row, event, column) {
-         // console.log('row-click');
+         console.log('row-click');
       },
 
       batchDelete() {
